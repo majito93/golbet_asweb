@@ -27,6 +27,9 @@ public class Bet : AuditableEntity
     //Navigation Property
     public Match Match { get; set; } = null!;
 
-    // Module 7 will add:  public string UserId  +  AppUser User
+    // Module 7 will add:  public string UserId
+    public string UserId { get; set; } = null!;   // FK -> AspNetUsers (string PK)
+    public AppUser User { get; set; } = null!;    // navigation property
+
 }
 
