@@ -15,21 +15,28 @@ public class MatchRepository : GenericRepository<Match>, IMatchRepository
 {
     public MatchRepository(AppDbContext context) : base(context) { }
 
-    public async Task<IEnumerable<Match>> GetAllWithTeamsAsync(MatchStatus? status = null)
+
+    public async Task<IEnumerable<Match>> GetAllWithTeamsAsync(MatchStatus? status = null, string? search = null) // NUEVO
     {
         var query = _dbSet
-            .Include(m => m.HomeTeam)// In practice, the include functions like a SQL-level JOIN.
-            .Include(m => m.AwayTeam)
-            .Where(m => m.IsActive)
-            .AsNoTracking()
-            .AsQueryable();
-
+        .Include(m => m.HomeTeam)// In practice, the include functions like a SQL-level JOIN.
+        .Include(m => m.AwayTeam)
+        .Where(m => m.IsActive)
+        .AsNoTracking()
+        .AsQueryable();
         if (status.HasValue)
             query = query.Where(m => m.Status == status.Value);
-
+        // NUEVO: todo este bloque if es nuevo (va ANTES del return)
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            query = query.Where(m => m.HomeTeam.Name.Contains(term)
+            || m.AwayTeam.Name.Contains(term));
+        }
         return await query.OrderBy(m => m.Date).ToListAsync();
         // Select * from Matches
     }
+
 
     public async Task<Match?> GetByIdWithDetailsAsync(int id)
     { 
